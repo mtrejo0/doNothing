@@ -10,6 +10,21 @@ export const Home = () => {
   const [holdTime, setHoldTime] = useState(7);
   const [breatheOutTime, setBreatheOutTime] = useState(8);
 
+  const [audio] = useState(new Audio(process.env.PUBLIC_URL + "waves.mp3"));
+  const [play, setPlay] = useState(false);
+
+  const handleButtonClick = () => {
+    audio.volume = 0.5;
+
+    if (play) {
+      audio.pause();
+      setPlay(false);
+    } else {
+      audio.loop = true;
+      audio.play();
+      setPlay(true);
+    }
+  };
   useEffect(() => {
     // Start the timer
     intervalIdRef.current = setInterval(() => {
@@ -39,14 +54,25 @@ export const Home = () => {
 
     let message = "";
     if (cycleSecondsElapsed < breatheInTime) {
-      message = `Breathe in ${breatheInTime - cycleSecondsElapsed}`;
+      message = `Breathe in for ... ${breatheInTime - cycleSecondsElapsed}`;
     } else if (cycleSecondsElapsed < breatheInTime + holdTime) {
-      message = `Hold ${breatheInTime + holdTime - cycleSecondsElapsed}`;
+      message = `Hold breath for ... ${
+        breatheInTime + holdTime - cycleSecondsElapsed
+      }`;
     } else {
-      message = `Breathe out ${totalCycleSeconds - cycleSecondsElapsed}`;
+      message = `Breathe out for ... ${
+        totalCycleSeconds - cycleSecondsElapsed
+      }`;
     }
     setMessage(message);
-  }, [timer]);
+  }, [
+    timer,
+    intervalIdRef,
+    breatheInTime,
+    breatheOutTime,
+    holdTime,
+    totalTime,
+  ]);
 
   // Format the timer value as MM:SS
   const formattedTime = new Date(timer * 1000).toISOString().substr(14, 5);
@@ -99,6 +125,10 @@ export const Home = () => {
         <br></br>
         <Typography>{message}</Typography>
         <br></br>
+
+        <Button onClick={handleButtonClick}>
+          {play ? "Pause" : "Play"} Waves
+        </Button>
 
         <Button onClick={handleOpen}>Settings</Button>
         <Menu
