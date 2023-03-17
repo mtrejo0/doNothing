@@ -176,6 +176,14 @@ export const Home = () => {
           </Box>
         </Menu>
       </Box>
+      <Button
+        sx={{ position: "absolute", bottom: "16px" }}
+        onClick={() => {
+          window.location.href = "https://forms.gle/HTLMazK7GP8CkNfk9";
+        }}
+      >
+        Remind me!
+      </Button>
     </Box>
   );
 };
