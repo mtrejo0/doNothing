@@ -1,7 +1,7 @@
-import { Box, Button, Menu, Slider, Typography } from "@mui/material";
-import { useEffect, useRef, useState } from "react";
+import { Box, Button, Menu, Slider, Stack, Typography } from "@mui/material";
+import { ReactNode, useEffect, useRef, useState } from "react";
 
-export const Home = () => {
+export const Home = ({children} : {children: ReactNode}) => {
   const [totalTime, setTotalTime] = useState(120);
   const [timer, setTimer] = useState(totalTime); // 2 minutes in seconds
   const intervalIdRef = useRef<any>(null);
@@ -10,21 +10,14 @@ export const Home = () => {
   const [holdTime, setHoldTime] = useState(7);
   const [breatheOutTime, setBreatheOutTime] = useState(8);
 
-  const [audio] = useState(new Audio(process.env.PUBLIC_URL + "waves.mp3"));
-  const [play, setPlay] = useState(false);
-
-  const handleButtonClick = () => {
-    audio.volume = 0.5;
-
-    if (play) {
-      audio.pause();
-      setPlay(false);
-    } else {
-      audio.loop = true;
-      audio.play();
-      setPlay(true);
+  useEffect(() => {
+    if (timer === 0){
+      clearInterval(intervalIdRef.current);
     }
-  };
+  }, [timer])
+
+
+
   useEffect(() => {
     // Start the timer
     intervalIdRef.current = setInterval(() => {
@@ -38,11 +31,13 @@ export const Home = () => {
 
     window.addEventListener("mousemove", resetTimer);
     window.addEventListener("keydown", resetTimer);
+    window.addEventListener("mousedown", resetTimer);
 
     // Cleanup
     return () => {
       clearInterval(intervalIdRef.current);
       window.removeEventListener("mousemove", resetTimer);
+      window.removeEventListener("mousedown", resetTimer);
       window.removeEventListener("keydown", resetTimer);
     };
   }, [totalTime]);
@@ -54,7 +49,7 @@ export const Home = () => {
 
     let message = "";
     if (cycleSecondsElapsed < breatheInTime) {
-      message = `Breathe in for ... ${breatheInTime - cycleSecondsElapsed}`;
+      message = `(Smile!) Breathe in for ... ${breatheInTime - cycleSecondsElapsed}`;
     } else if (cycleSecondsElapsed < breatheInTime + holdTime) {
       message = `Hold breath for ... ${
         breatheInTime + holdTime - cycleSecondsElapsed
@@ -63,6 +58,11 @@ export const Home = () => {
       message = `Breathe out for ... ${
         totalCycleSeconds - cycleSecondsElapsed
       }`;
+    }
+    if (timer === 0 ){
+
+      message = `You did it! Look at you taking care of yourself. I'm proud of you. Rise and shine. Your best days are ahead of you. Be well, smile, and breathe my friend <3`;
+
     }
     setMessage(message);
   }, [
@@ -120,18 +120,23 @@ export const Home = () => {
           zIndex: "1",
         }}
       >
-        <Typography>Do nothing for 2 min</Typography>
+        <Typography>Do nothing for {totalTime/60 | 0 } min</Typography>
+        
         <br></br>
         <Typography>{formattedTime}</Typography>
         <br></br>
         <Typography>{message}</Typography>
         <br></br>
 
-        <Button onClick={handleButtonClick}>
-          {play ? "Pause" : "Play"} Waves
-        </Button>
+        <Stack direction="row" spacing={2} marginTop="16px"> 
 
-        <Button onClick={handleOpen}>Settings</Button>
+          {children}
+
+          <Button onClick={handleOpen} variant={"outlined"}>Settings</Button>
+        
+        </Stack>
+
+        
         <Menu
           anchorEl={anchorEl}
           open={Boolean(anchorEl)}
@@ -179,6 +184,7 @@ export const Home = () => {
       </Box>
       <Button
         sx={{ position: "absolute", bottom: "16px" }}
+        variant={"outlined"}
         onClick={() => {
           window.location.href = "https://forms.gle/HTLMazK7GP8CkNfk9";
         }}
